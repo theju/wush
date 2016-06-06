@@ -2,5 +2,5 @@ django
 requests
 redis
 rq
-tornado
 pywebpush
+hyper

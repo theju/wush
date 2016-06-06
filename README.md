@@ -38,6 +38,7 @@
   REDIS_HOST = "localhost"
   REDIS_PORT = 6379
   APNS_CERTFILE = "/path/to/apns_cert.pem"
+  APNS_TOPIC = "<com.app.bundlename>"
   GCM_URL = "https://gcm-http.googleapis.com/gcm/send"
   GCM_KEY = "..."
   ```

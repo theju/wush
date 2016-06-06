@@ -5,10 +5,10 @@ import json
 import redis
 import rq
 import requests
-import functools
-import tornado
+import time
 
 from pywebpush import WebPusher
+from hyper.contrib import HTTP20Adapter
 
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -16,8 +16,6 @@ from django.conf import settings
 from django.views.decorators.http import require_POST
 
 from .models import DeviceToken
-
-from .apns import APNS
 
 
 REDIS_CLIENT = redis.Redis(settings.REDIS_HOST, settings.REDIS_PORT, db=0)
@@ -74,18 +72,40 @@ def queue_push_android(apids, message):
 
 
 def queue_push_ios(apids, message):
-    apns = APNS(debug=settings.DEBUG, certfile=settings.APNS_CERTFILE)
-    apns_payload = []
+    apids_to_clear = []
+    if settings.DEBUG == True:
+        apns_host = "https://api.development.push.apple.com"
+    else:
+        apns_host = "https://api.push.apple.com"
 
-    apns_payload.append(({
-        "aps": {
-            "alert": json.loads(message)["title"],
-            "badge": "auto",
-            "sound": "default",
+    req_session = requests.Session()
+    req_session.mount(apns_host, HTTP20Adapter())
+    ttl = 7 * 86400
+    for apid in apids:
+        payload = {
+            "aps": {
+                "alert": json.loads(message)["title"],
+                "badge": "auto",
+                "sound": "default",
+            }
         }
-    }, list(apids.values_list('token', flat=True))))
-    partial_fn = functools.partial(apns.send_notifications, apns_payload)
-    tornado.ioloop.IOLoop.instance().run_sync(partial_fn)
+        url = "{0}/3/device/{1}".format(apns_host, apid.token)
+        response = req_session.post(
+            url,
+            data=json.dumps(payload),
+            headers={
+                "Content-Type": "application/json",
+                "apns-expiration": str(int(time.time()) + ttl),
+                "apns-topic": settings.APNS_TOPIC
+            },
+            cert=settings.APNS_CERTFILE
+        )
+        if response.status_code == 410:
+            apids_to_clear.append(apid)
+
+    # Remove unregistered ids
+    for apid in apids_to_clear:
+        apid.delete()
 
 
 def queue_push_chrome(apids, message):
