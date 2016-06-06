@@ -36,7 +36,7 @@
 
   ```
   REDIS_HOST = "localhost"
-  REDIS_PORT = 6479
+  REDIS_PORT = 6379
   APNS_CERTFILE = "/path/to/apns_cert.pem"
   GCM_URL = "https://gcm-http.googleapis.com/gcm/send"
   GCM_KEY = "..."

@@ -79,7 +79,7 @@ def queue_push_ios(apids, message):
 
     apns_payload.append(({
         "aps": {
-            "alert": message,
+            "alert": json.loads(message)["title"],
             "badge": "auto",
             "sound": "default",
         }
