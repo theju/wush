@@ -81,14 +81,16 @@ def queue_push_ios(apids, message):
     req_session = requests.Session()
     req_session.mount(apns_host, HTTP20Adapter())
     ttl = 7 * 86400
+    data = json.loads(message)
     for apid in apids:
         payload = {
             "aps": {
-                "alert": json.loads(message)["title"],
+                "alert": data["title"],
                 "badge": "auto",
                 "sound": "default",
             }
         }
+        payload.update(data)
         url = "{0}/3/device/{1}".format(apns_host, apid.token)
         response = req_session.post(
             url,
