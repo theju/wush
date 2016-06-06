@@ -1,6 +1,6 @@
 # Wush
 
-## A simple django app that handles mobile push notifications
+## A simple django app that handles mobile and web push notifications
 
 ### Install
 
@@ -58,16 +58,17 @@
   token = DeviceToken.objects.create(
       user = some_user,
       token = "<token_from_mobile_device>",
-	  platform = "<android|ios>"
+	  platform = "<android|ios|firefox|chrome>"
   )
   ```
 * Perform an HTTP Post request onto the `/push/notify/` URL with the
-  `to` (username) and `body` (message of the notification) params to send out a
-  push notification to that `username` on all their devices. Example
+  `to` (username) and `body` (message of the notification; should be a JSON
+  object) params to send out a push notification to that `username` on all
+  their devices. Example
 
   ```
   requests.post("/push/notify/", data={
-      "to": "<some_username>", "body": "Message of the push notification"
+      "to": "<some_username>", "body": "{\"title\": \"Message of the push notification\"}"
   })
   ```
 * Run the `feedback` management command periodically to prune disabled iOS tokens.
