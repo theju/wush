@@ -5,6 +5,9 @@ from django.conf import settings
 PLATFORM_CHOICES = (
     ("android", "android"),
     ("ios", "ios"),
+    # Web Push
+    ("firefox", "firefox"),
+    ("chrome", "chrome"),
 )
 
 class DeviceToken(models.Model):
