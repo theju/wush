@@ -5,6 +5,7 @@ VERSION = '0.0.1'
 setup(name='wush',
       version=VERSION,
       description='A django app to send web and mobile push notifications',
+      long_description=open('README.md').read(),
       author='Thejaswi Puthraya',
       author_email='thejaswi.puthraya@gmail.com',
       url='https://github.com/theju/wush',
