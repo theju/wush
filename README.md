@@ -4,6 +4,14 @@
 
 ### Install
 
+* Install through `pip`:
+
+  ```
+  pip install -e git+git://github.com/theju/wush.git#egg=wush
+  ```
+  
+  Or follow the setups below
+
 * Clone the git repo:
 
   ```
@@ -15,6 +23,9 @@
   ```
   pip install -r requirements.txt
   ```
+  
+### Setup
+
 * Reference this app in your project's `settings.py`:
 
   ```
