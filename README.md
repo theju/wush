@@ -83,8 +83,3 @@
       "to": "<some_username>", "body": "{\"title\": \"Message of the push notification\"}"
   })
   ```
-* Run the `feedback` management command periodically to prune disabled iOS tokens.
-
-  ```
-  python manage.py push_feedback
-  ```
