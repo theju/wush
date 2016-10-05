@@ -1,6 +1,3 @@
-import django
-django.setup()
-
 import json
 import redis
 import rq
@@ -24,6 +21,9 @@ REDIS_CLIENT = redis.Redis(settings.REDIS_HOST, settings.REDIS_PORT, db=0)
 @csrf_exempt
 @require_POST
 def send_push_notification(request):
+    import django
+    django.setup()
+
     queue = rq.Queue(connection=REDIS_CLIENT)
     to_username = request.POST.get("to")
     # Json encoded body
