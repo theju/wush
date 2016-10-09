@@ -114,13 +114,10 @@ def queue_push_chrome(apids, message):
     payload_data = json.loads(message)
     ttl = 7 * 86400
     apids_to_clear = []
-    headers = {
-        "Authorization": settings.GCM_KEY
-    }
     for apid in apids:
         subscription = json.loads(apid.token)
         wp = WebPusher(subscription)
-        response = wp.send(json.dumps(payload_data), headers=headers, ttl=ttl)
+        response = wp.send(json.dumps(payload_data), gcm_key=settings.GCM_KEY, ttl=ttl)
 
         if response.status_code == 400:
             content = response.content
