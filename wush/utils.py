@@ -18,4 +18,4 @@ class CustomQueue(rq.Queue):
     def __init__(self, *args, **kwargs):
         kwargs["connection"] = REDIS_CLIENT
         kwargs["job_class"] = CustomJob
-        super(CustomQueue, self).__init__(self, *args, **kwargs)
+        super(CustomQueue, self).__init__(*args, **kwargs)
