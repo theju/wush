@@ -1,6 +1,4 @@
 import json
-import redis
-import rq
 import requests
 import time
 
@@ -13,18 +11,13 @@ from django.conf import settings
 from django.views.decorators.http import require_POST
 
 from .models import DeviceToken
-
-
-REDIS_CLIENT = redis.Redis(settings.REDIS_HOST, settings.REDIS_PORT, db=0)
+from .utils import CustomQueue
 
 
 @csrf_exempt
 @require_POST
 def send_push_notification(request):
-    import django
-    django.setup()
-
-    queue = rq.Queue(connection=REDIS_CLIENT)
+    queue = CustomQueue()
     to_username = request.POST.get("to")
     # Json encoded body
     message = request.POST.get("body")
