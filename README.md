@@ -83,3 +83,9 @@
       "to": "<some_username>", "body": "{\"title\": \"Message of the push notification\"}"
   })
   ```
+
+* Running `rq worker`:
+
+  ```
+  DJANGO_SETTINGS_MODULE=<settings_import_path> rqworker <queue_1> <queue_2> ... --queue-class 'wush.utils.CustomQueue' --job-class 'wush.utils.CustomJob'
+  ```
