@@ -11,7 +11,7 @@ PLATFORM_CHOICES = (
 )
 
 class DeviceToken(models.Model):
-    user = models.ForeignKey(settings.AUTH_USER_MODEL)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     token = models.TextField()
     platform = models.CharField(choices=PLATFORM_CHOICES, max_length=20)
     created_on = models.DateTimeField(auto_now_add=True)
