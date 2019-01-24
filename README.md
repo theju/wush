@@ -8,6 +8,7 @@
 
   ```
   pip install -e git+git://github.com/theju/wush.git#egg=wush
+  python setup.py install
   ```
   
   Or follow the setups below
@@ -17,11 +18,7 @@
   ```
   git clone https://github.com/theju/wush
   cd wush
-  ```
-* Install the dependencies listed in the `requirements.txt`:
-
-  ```
-  pip install -r requirements.txt
+  python setup.py install
   ```
   
 ### Setup
@@ -48,10 +45,19 @@
   ```
   REDIS_HOST = "localhost"
   REDIS_PORT = 6379
+
+  # For iOS
   APNS_CERTFILE = "/path/to/apns_cert.pem"
   APNS_TOPIC = "<com.app.bundlename>"
+
+  # Used only for Android.
+  # TODO: Migrate to FCM
   GCM_URL = "https://gcm-http.googleapis.com/gcm/send"
   GCM_KEY = "..."
+
+  # VAPID Push (for Web)
+  VAPID_PRIVATE_KEY = "/path/to/private_key.pem"
+  VAPID_PUBLIC_KEY  = "/path/to/public_key.pem"
   ```
 * Reference the urls from the app into your project:
 

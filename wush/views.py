@@ -4,9 +4,10 @@ import time
 
 import django_rq
 
-from pywebpush import WebPusher
+from pywebpush import webpush
 from hyper.contrib import HTTP20Adapter
 
+from django.utils import timezone
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from django.conf import settings
@@ -47,6 +48,7 @@ def send_push_notification(request):
 
 
 def queue_push_android(apids, message, ttl=DEFAULT_TTL):
+    # TODO: Migrate to FCM
     apids_to_clear = []
 
     push_payload = json.dumps({
@@ -76,7 +78,6 @@ def queue_push_ios(apids, message, ttl=DEFAULT_TTL):
 
     req_session = requests.Session()
     req_session.mount(apns_host, HTTP20Adapter())
-    ttl = 7 * 86400
     data = json.loads(message)
     for apid in apids:
         payload = {
@@ -111,8 +112,15 @@ def queue_push_chrome(apids, message, ttl=DEFAULT_TTL):
     apids_to_clear = []
     for apid in apids:
         subscription = json.loads(apid.token)
-        wp = WebPusher(subscription)
-        response = wp.send(json.dumps(payload_data), ttl=ttl)
+        vapid_claims = {
+            'exp': int(timezone.now().timestamp()) + ttl,
+            'sub': ','.join(['{0}:{1}'.format('mailto', ii[1]) for ii in settings.ADMINS])
+        }
+        response = webpush(
+            subscription,
+            json.dumps(payload_data),
+            vapid_private_key=settings.VAPID_PRIVATE_KEY,
+            vapid_claims=vapid_claims)
 
         if response.status_code == 400:
             content = response.content
@@ -129,11 +137,24 @@ def queue_push_firefox(apids, message, ttl=DEFAULT_TTL):
     apids_to_clear = []
     for apid in apids:
         subscription = json.loads(apid.token)
-        wp = WebPusher(subscription)
-        response = wp.send(json.dumps(payload_data), ttl=ttl)
+        vapid_claims = {
+            'exp': int(timezone.now().timestamp()) + ttl,
+            'sub': ','.join(['{0}:{1}'.format('mailto', ii[1]) for ii in settings.ADMINS])
+        }
+        response = webpush(
+            subscription,
+            json.dumps(payload_data),
+            vapid_private_key=settings.VAPID_PRIVATE_KEY,
+            vapid_claims=vapid_claims
+        )
         if response.status_code == 410:
             apids_to_clear.append(apid)
 
     # Remove unregistered ids
     for apid in apids_to_clear:
         apid.delete()
+
+
+def vapid_public_key(request):
+    ff = open(settings.VAPID_PUBLIC_KEY).read()
+    return HttpResponse(ff, content_type='text/plain')
