@@ -69,6 +69,9 @@
   ```
   python manage.py migrate
   ```
+* Run an `rqworker` (please refer to `django_rq documentation`) daemon
+  so that push notifications are queued and sent outside the request-response
+  cycle.
 * The push tokens that are fetched from the mobile devices need to
   be stored into the `DeviceToken` model. For example:
 
@@ -82,16 +85,10 @@
 * Perform an HTTP Post request onto the `/push/notify/` URL with the
   `to` (username) and `body` (message of the notification; should be a JSON
   object) params to send out a push notification to that `username` on all
-  their devices. Example
+  their devices. Example:
 
   ```
   requests.post("/push/notify/", data={
       "to": "<some_username>", "body": "{\"title\": \"Message of the push notification\"}"
   })
-  ```
-
-* Running `rq worker`:
-
-  ```
-  DJANGO_SETTINGS_MODULE=<settings_import_path> rqworker <queue_1> <queue_2> ... --queue-class 'wush.utils.CustomQueue' --job-class 'wush.utils.CustomJob'
   ```
