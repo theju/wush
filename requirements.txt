@@ -1,6 +1,0 @@
-django
-requests
-redis
-rq
-pywebpush
-hyper

@@ -1,6 +1,13 @@
+import configparser
+
 from setuptools import setup, find_packages
 
-VERSION = '0.0.1'
+VERSION = '0.0.2'
+
+def packages_from_pipfile():
+    cfg = configparser.ConfigParser()
+    cfg.read('Pipfile')
+    return [ii for ii in cfg['packages'].keys()]
 
 setup(name='wush',
       version=VERSION,
@@ -11,5 +18,5 @@ setup(name='wush',
       url='https://github.com/theju/wush',
       license="MIT",
       packages=find_packages(),
-      requires=open("requirements.txt").readlines()
+      install_requires=packages_from_pipfile()
      )

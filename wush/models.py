@@ -8,6 +8,8 @@ PLATFORM_CHOICES = (
     # Web Push
     ("firefox", "firefox"),
     ("chrome", "chrome"),
+    # 'web' is generic for Vapid
+    ("web", "web"),
 )
 
 class DeviceToken(models.Model):

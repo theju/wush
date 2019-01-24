@@ -2,6 +2,8 @@ import json
 import requests
 import time
 
+import django_rq
+
 from pywebpush import WebPusher
 from hyper.contrib import HTTP20Adapter
 
@@ -11,13 +13,14 @@ from django.conf import settings
 from django.views.decorators.http import require_POST
 
 from .models import DeviceToken
-from .utils import CustomQueue
+
+DEFAULT_TTL = getattr(settings, 'DEFAULT_TTL', 7 * 86400)
 
 
 @csrf_exempt
 @require_POST
 def send_push_notification(request):
-    queue = CustomQueue()
+    queue = django_rq.get_queue('default')
     to_username = request.POST.get("to")
     # Json encoded body
     message = request.POST.get("body")
@@ -43,7 +46,7 @@ def send_push_notification(request):
     return JsonResponse({"success": True})
 
 
-def queue_push_android(apids, message):
+def queue_push_android(apids, message, ttl=DEFAULT_TTL):
     apids_to_clear = []
 
     push_payload = json.dumps({
@@ -64,7 +67,7 @@ def queue_push_android(apids, message):
     DeviceToken.objects.filter(token__in=apids_to_clear).delete()
 
 
-def queue_push_ios(apids, message):
+def queue_push_ios(apids, message, ttl=DEFAULT_TTL):
     apids_to_clear = []
     if settings.DEBUG == True:
         apns_host = "https://api.development.push.apple.com"
@@ -103,14 +106,13 @@ def queue_push_ios(apids, message):
         apid.delete()
 
 
-def queue_push_chrome(apids, message):
+def queue_push_chrome(apids, message, ttl=DEFAULT_TTL):
     payload_data = json.loads(message)
-    ttl = 7 * 86400
     apids_to_clear = []
     for apid in apids:
         subscription = json.loads(apid.token)
         wp = WebPusher(subscription)
-        response = wp.send(json.dumps(payload_data), gcm_key=settings.GCM_KEY, ttl=ttl)
+        response = wp.send(json.dumps(payload_data), ttl=ttl)
 
         if response.status_code == 400:
             content = response.content
@@ -122,9 +124,8 @@ def queue_push_chrome(apids, message):
         apid.delete()
 
 
-def queue_push_firefox(apids, message):
+def queue_push_firefox(apids, message, ttl=DEFAULT_TTL):
     payload_data = json.loads(message)
-    ttl = 7 * 86400
     apids_to_clear = []
     for apid in apids:
         subscription = json.loads(apid.token)
