@@ -33,21 +33,21 @@ def send_push_notification(request):
     chrome_apids = apids.filter(platform="chrome")
 
     if android_apids.count():
-        queue.enqueue(queue_push_android, android_apids, message)
+        queue.enqueue(push_android, android_apids, message)
 
     if ios_apids.count():
-        queue.enqueue(queue_push_ios, ios_apids, message)
+        queue.enqueue(push_ios, ios_apids, message)
 
     if firefox_apids.count():
-        queue.enqueue(queue_push_firefox, firefox_apids, message)
+        queue.enqueue(push_firefox, firefox_apids, message)
 
     if chrome_apids.count():
-        queue.enqueue(queue_push_chrome, chrome_apids, message)
+        queue.enqueue(push_chrome, chrome_apids, message)
 
     return JsonResponse({"success": True})
 
 
-def queue_push_android(apids, message, ttl=DEFAULT_TTL):
+def push_android(apids, message, ttl=DEFAULT_TTL):
     # TODO: Migrate to FCM
     apids_to_clear = []
 
@@ -69,7 +69,7 @@ def queue_push_android(apids, message, ttl=DEFAULT_TTL):
     DeviceToken.objects.filter(token__in=apids_to_clear).delete()
 
 
-def queue_push_ios(apids, message, ttl=DEFAULT_TTL):
+def push_ios(apids, message, ttl=DEFAULT_TTL):
     apids_to_clear = []
     if settings.DEBUG == True:
         apns_host = "https://api.development.push.apple.com"
@@ -107,7 +107,7 @@ def queue_push_ios(apids, message, ttl=DEFAULT_TTL):
         apid.delete()
 
 
-def queue_push_chrome(apids, message, ttl=DEFAULT_TTL):
+def push_chrome(apids, message, ttl=DEFAULT_TTL):
     payload_data = json.loads(message)
     apids_to_clear = []
     for apid in apids:
@@ -132,7 +132,7 @@ def queue_push_chrome(apids, message, ttl=DEFAULT_TTL):
         apid.delete()
 
 
-def queue_push_firefox(apids, message, ttl=DEFAULT_TTL):
+def push_firefox(apids, message, ttl=DEFAULT_TTL):
     payload_data = json.loads(message)
     apids_to_clear = []
     for apid in apids:
