@@ -113,7 +113,6 @@ def push_chrome(apids, message, ttl=DEFAULT_TTL):
     for apid in apids:
         subscription = json.loads(apid.token)
         vapid_claims = {
-            'exp': int(timezone.now().timestamp()) + ttl,
             'sub': ','.join(['{0}:{1}'.format('mailto', ii[1]) for ii in settings.ADMINS])
         }
         response = webpush(
@@ -138,7 +137,6 @@ def push_firefox(apids, message, ttl=DEFAULT_TTL):
     for apid in apids:
         subscription = json.loads(apid.token)
         vapid_claims = {
-            'exp': int(timezone.now().timestamp()) + ttl,
             'sub': ','.join(['{0}:{1}'.format('mailto', ii[1]) for ii in settings.ADMINS])
         }
         response = webpush(
