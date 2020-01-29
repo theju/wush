@@ -4,8 +4,8 @@ import time
 
 import django_rq
 
-from pywebpush import webpush
 from hyper.contrib import HTTP20Adapter
+from pywebpush import webpush, WebPushException
 
 from django.utils import timezone
 from django.http import JsonResponse
@@ -115,15 +115,15 @@ def push_chrome(apids, message, ttl=DEFAULT_TTL):
         vapid_claims = {
             'sub': ','.join(['{0}:{1}'.format('mailto', ii[1]) for ii in settings.ADMINS])
         }
-        response = webpush(
-            subscription,
-            json.dumps(payload_data),
-            vapid_private_key=settings.VAPID_PRIVATE_KEY,
-            vapid_claims=vapid_claims)
-
-        if response.status_code == 400:
-            content = response.content
-            if content.find("UnauthorizedRegistration") >= 0:
+        try:
+            webpush(
+                subscription,
+                json.dumps(payload_data),
+                vapid_private_key=settings.VAPID_PRIVATE_KEY,
+                vapid_claims=vapid_claims)
+        except WebPushException as ex:
+            response = ex.response
+            if response.status_code in [404, 410]:
                 apids_to_clear.append(apid)
 
     # Remove unregistered ids
@@ -139,14 +139,16 @@ def push_firefox(apids, message, ttl=DEFAULT_TTL):
         vapid_claims = {
             'sub': ','.join(['{0}:{1}'.format('mailto', ii[1]) for ii in settings.ADMINS])
         }
-        response = webpush(
-            subscription,
-            json.dumps(payload_data),
-            vapid_private_key=settings.VAPID_PRIVATE_KEY,
-            vapid_claims=vapid_claims
-        )
-        if response.status_code == 410:
-            apids_to_clear.append(apid)
+        try:
+            webpush(
+                subscription,
+                json.dumps(payload_data),
+                vapid_private_key=settings.VAPID_PRIVATE_KEY,
+                vapid_claims=vapid_claims)
+        except WebPushException as ex:
+            response = ex.response
+            if response.status_code in [404, 410]:
+                apids_to_clear.append(apid)
 
     # Remove unregistered ids
     for apid in apids_to_clear:
